@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { BASE_URL, postReq } from "@/config/api";
+import Loading from "@/lib/Loading";
 
 const oauthSession = async (token: string) => {
   const url = `${BASE_URL}/auth/oauth-session`;
@@ -43,7 +44,7 @@ const OAuth = () => {
   }
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Loading hScreen={true} />;
   }
 
   return null;
