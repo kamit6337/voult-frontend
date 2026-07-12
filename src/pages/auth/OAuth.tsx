@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { postReq } from "@/config/api";
+import { BASE_URL, postReq } from "@/config/api";
 
 const oauthSession = async (token: string) => {
-  const url = `http://localhost:8000/api/v1/auth/oauth-session`;
+  const url = `${BASE_URL}/auth/oauth-session`;
 
   const response = await postReq(url, { token });
   return response;
