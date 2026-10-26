@@ -9,8 +9,10 @@ const SecretValue = ({ value }: { value: string }) => {
   if (isValidUrl(value)) {
     return (
       <Popover open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-        <PopoverTrigger className="line-clamp-1">{value}</PopoverTrigger>
-        <PopoverContent align="center" className="w-max" asChild>
+        <PopoverTrigger className="flex-1 flex justify-start">
+          <div className="line-clamp-1">{value}</div>
+        </PopoverTrigger>
+        <PopoverContent align="center" className="min-w-3/4" asChild>
           <Button>
             <a href={value} target="_blank" onClick={() => setIsOpen(false)}>
               Click to Url

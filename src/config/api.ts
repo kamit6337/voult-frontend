@@ -14,7 +14,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      navigateTo("/signin");
+      navigateTo("/signin?errMsg=Unauthorized Access. Please sign in.");
     }
     return Promise.reject(error);
   },

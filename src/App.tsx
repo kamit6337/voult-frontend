@@ -14,8 +14,10 @@ import { toast, Toaster } from "sonner";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
-    onError(error) {
-      toast.error(error.message);
+    onError(error, query) {
+
+
+      toast.error(error as unknown as string);
     },
   }),
   mutationCache: new MutationCache({
