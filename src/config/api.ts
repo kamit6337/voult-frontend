@@ -54,6 +54,22 @@ export const postReq = async <T>(
   }
 };
 
+export const patchReq = async <T>(
+  path: string,
+  body: Record<string, string | number | boolean>,
+) => {
+  try {
+    const res = await api.patch<T>(path, body);
+
+    return res.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      throw error.response?.data ?? error;
+    }
+    throw error;
+  }
+};
+
 export const deleteReq = async <T>(
   path: string,
   params?: Record<string, string | number | boolean>,

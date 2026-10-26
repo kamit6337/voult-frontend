@@ -12,6 +12,9 @@ import { Star, EllipsisVerticalIcon, CopyIcon, CheckIcon } from "lucide-react";
 import CopyButton from "./CopyButton";
 import { Link } from "react-router-dom";
 import SecretValue from "./SecretValue";
+import { AlertDialog, AlertDialogTrigger } from "../ui/alert-dialog";
+import CreateSecret from "@/pages/protected/secrets/CreateSecret";
+import { useState } from "react";
 
 type Props = {
   secretsArr: SECRET[];
@@ -19,6 +22,15 @@ type Props = {
 };
 
 const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
+  const [selectedSecret, setSelectedSecret] = useState<null | SECRET>(null);
+
+  const [editOpen, setEditOpen] = useState(false);
+
+  const handleSelect = (secret: SECRET) => {
+    setSelectedSecret(secret);
+    setEditOpen(true);
+  };
+
   return (
     <main className="space-y-2">
       {isHeader && (
@@ -66,7 +78,9 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
                 align="end"
                 className="w-max whitespace-nowrap"
               >
-                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleSelect(item)}>
+                  Edit
+                </DropdownMenuItem>
 
                 <DropdownMenuItem>
                   {item.favourite ? "Remove to Favourite" : "Add to Favourite"}
@@ -90,6 +104,20 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
           </div>
         );
       })}
+
+      <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
+        {selectedSecret && editOpen && (
+          <CreateSecret
+            key={selectedSecret._id}
+            isUpdate={true}
+            name={selectedSecret.name}
+            value={selectedSecret.value}
+            favourite={selectedSecret.favourite}
+            secretId={selectedSecret._id}
+            onClose={() => setEditOpen(false)}
+          />
+        )}
+      </AlertDialog>
     </main>
   );
 };

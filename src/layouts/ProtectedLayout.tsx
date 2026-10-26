@@ -17,17 +17,15 @@ export default function ProtectedLayout() {
     return <Loading hScreen={true} />;
   }
 
-console.log("ProtectedLayout data", data);
-console.log("ProtectedLayout error", error);
-
-
   if (error) {
-    return <Navigate to={`/signin?errMsg=${error?.message || "Unauthorized"}`} replace />;
+    return (
+      <Navigate
+        to={`/signin?errMsg=${error?.message || "Unauthorized"}`}
+        replace
+      />
+    );
   }
 
-
-
-  
   return (
     <SidebarProvider>
       <AppSidebar />
