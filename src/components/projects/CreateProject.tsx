@@ -24,72 +24,83 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { postReq } from "@/config/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { CREATE_PROJECT, PROJECT, UPDATE_PROJECT } from "@/types/project";
+import useCreate from "@/hooks/mutation/useCreate";
+import useUpdate from "@/hooks/mutation/useUpdate";
 
 type Props = {
-  update?: boolean;
-  projectName?: string;
+  isUpdate?: boolean;
+  projectId?: string;
+  name?: string;
   favourite?: boolean;
-  handleOpen: (bool: boolean) => void;
+  onClose: () => void;
 };
 
 const CreateProject = ({
-  handleOpen,
-  update = false,
-  projectName,
+  isUpdate = false,
+  name,
   favourite,
+  projectId,
+  onClose,
 }: Props) => {
-  const queryClient = useQueryClient();
-
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      favourite: false,
+      name: name ?? "",
+      favourite: favourite ?? false,
     },
   });
 
-  useEffect(() => {
-    if (update && projectName && favourite) {
-      reset({
-        name: projectName,
-        favourite,
+  const createProject = useCreate<CREATE_PROJECT, PROJECT>({
+    queryKey: ["user", "projects"],
+    mutationKey: ["user", "projects", "create"],
+    urlPath: "/projects",
+  });
+
+  const updateProject = useUpdate<UPDATE_PROJECT, PROJECT>({
+    queryKey: ["user", "projects"],
+    mutationKey: ["user", "projects", "update"],
+    urlPath: "/projects",
+  });
+
+  const onSubmit = (data: FormValues) => {
+    if (isUpdate && projectId) {
+      const obj = {
+        ...data,
+        _id: projectId,
+      };
+
+      updateProject.mutateAsync(obj).then(() => {
+        handleClose();
+        toast.success("Secret Updated Successfully");
       });
+      return;
     }
-  }, [update, projectName, favourite]);
 
-  const onSubmit = async (data: FormValues) => {
-    try {
-      const response = await postReq("/projects", data);
-
-      queryClient.invalidateQueries({
-        queryKey: ["user", "projects"],
-        exact: true,
-      });
-
+    createProject.mutateAsync(data).then(() => {
       handleClose();
-    } catch (error: any) {
-      console.log("ERROR", error);
-
-      toast.error(error.message);
-    }
+      toast.success("Secret Created Successfully");
+    });
   };
 
   const handleClose = () => {
+    onClose();
     reset();
-    handleOpen(false);
   };
+
+  const isPending = isUpdate
+    ? updateProject.isPending
+    : createProject.isPending;
 
   return (
     <AlertDialogContent>
-      <AlertDialogTitle>{update ? "Update" : "New"} Project</AlertDialogTitle>
+      <AlertDialogTitle>{isUpdate ? "Update" : "New"} Project</AlertDialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FieldSet>
           <FieldGroup>
@@ -135,9 +146,14 @@ const CreateProject = ({
                 Cancel
               </AlertDialogCancel>
 
-              <Button type="submit" disabled={isSubmitting}>
-                {update && isSubmitting ? "Updating..." : "Update"}
-                {!update && isSubmitting ? "Creating..." : "Create"}
+              <Button type="submit" disabled={isPending}>
+                {isUpdate
+                  ? isPending
+                    ? "Updating..."
+                    : "Update"
+                  : isPending
+                    ? "Creating..."
+                    : "Create"}
               </Button>
             </AlertDialogFooter>
           </FieldGroup>

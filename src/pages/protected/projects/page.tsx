@@ -9,10 +9,6 @@ import { useState } from "react";
 const ProjectsPage = () => {
   const [open, setOpen] = useState(false);
 
-  const handleOpen = (bool: boolean) => {
-    setOpen(bool);
-  };
-
   return (
     <section className="space-y-2">
       <div className="space-y-2 flex flex-col">
@@ -21,7 +17,7 @@ const ProjectsPage = () => {
             <AlertDialogTrigger asChild>
               <Button>Create Project</Button>
             </AlertDialogTrigger>
-            <CreateProject handleOpen={handleOpen} />
+            <CreateProject onClose={() => setOpen(false)} />
           </AlertDialog>
         </div>
         <Separator />

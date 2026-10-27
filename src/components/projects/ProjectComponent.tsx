@@ -10,6 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { useState } from "react";
+import { AlertDialog } from "../ui/alert-dialog";
+import CreateProject from "./CreateProject";
+import DeleteProject from "./DeleteProject";
 
 type Props = {
   projects: PROJECT[];
@@ -17,6 +21,21 @@ type Props = {
 };
 
 const ProjectComponent = ({ projects, isHeader = true }: Props) => {
+  const [selectedProject, setSelectedProject] = useState<null | PROJECT>(null);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleEditSelect = (project: PROJECT) => {
+    setSelectedProject(project);
+    setEditOpen(true);
+  };
+
+  const handleDeleteSelect = (project: PROJECT) => {
+    setSelectedProject(project);
+    setDeleteOpen(true);
+  };
+
   return (
     <main className="space-y-2">
       {isHeader && (
@@ -49,7 +68,7 @@ const ProjectComponent = ({ projects, isHeader = true }: Props) => {
               <div className="basis-10 flex justify-center">
                 <Star size={16} fill={item.favourite ? "yellow" : "black"} />
               </div>
-              <Link to={`/projects?id=${item._id}`} className="flex-1">
+              <Link to={`/single?id=${item._id}`} className="flex-1">
                 <p className="line-clamp-1">{item.name}</p>
               </Link>
               <p className="basis-40 flex justify-center text-xs dark:text-gray-200">
@@ -70,21 +89,68 @@ const ProjectComponent = ({ projects, isHeader = true }: Props) => {
                   align="end"
                   className="w-max whitespace-nowrap"
                 >
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
+                    Edit
+                  </DropdownMenuItem>
 
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                  // onClick={() =>
+                  //   updateSecret.mutate({
+                  //     _id: item._id,
+                  //     favourite: !item.favourite,
+                  //   })
+                  // }
+                  >
                     {item.favourite
                       ? "Remove to Favourite"
                       : "Add to Favourite"}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
+                    Delete
+                  </DropdownMenuItem>
                   <Separator />
-                  <DropdownMenuItem>Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="text-xs flex flex-col items-start">
+                    <p>CreatedAt</p>
+                    <p className="self-center">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-xs flex flex-col items-start">
+                    <p>UpdatedAt</p>
+                    <p className="self-center">
+                      {new Date(item.updatedAt).toLocaleDateString()}
+                    </p>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         );
       })}
+
+      <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
+        {selectedProject && editOpen && (
+          <CreateProject
+            key={selectedProject._id}
+            isUpdate={true}
+            name={selectedProject.name}
+            favourite={selectedProject.favourite}
+            projectId={selectedProject._id}
+            onClose={() => setEditOpen(false)}
+          />
+        )}
+      </AlertDialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        {selectedProject && deleteOpen && (
+          <DeleteProject
+            key={selectedProject._id}
+            name={selectedProject.name}
+            projectId={selectedProject._id}
+            onClose={() => setDeleteOpen(false)}
+          />
+        )}
+      </AlertDialog>
     </main>
   );
 };

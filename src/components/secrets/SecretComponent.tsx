@@ -46,11 +46,11 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
     urlPath: "/secrets/favourite",
   });
 
-  useEffect(() => {
-    if (updateSecret.isSuccess) {
-      toast.success("Secret Favourite Updated Successfully");
-    }
-  }, [updateSecret.isSuccess]);
+  // useEffect(() => {
+  //   if (updateSecret.isSuccess) {
+  //     toast.success("Secret Favourite Updated Successfully");
+  //   }
+  // }, [updateSecret.isSuccess]);
 
   return (
     <main className="space-y-2">
