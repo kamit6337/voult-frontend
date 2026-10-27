@@ -10,7 +10,7 @@ type Props = {
   urlPath: string;
 };
 
-const useUpdate = <T extends MutationVariables>({
+const useUpdate = <T extends MutationVariables, V extends { _id: string }>({
   mutationKey,
   queryKey,
   urlPath,
@@ -19,14 +19,14 @@ const useUpdate = <T extends MutationVariables>({
 
   const query = useMutation({
     mutationKey: [...mutationKey],
-    mutationFn: (obj: T) => patchReq<SECRET>(urlPath, obj),
+    mutationFn: (obj: T) => patchReq<V>(urlPath, obj),
     onSuccess(data, variables, onMutateResult, context) {
       const isQueryPresent = queryClient.getQueryState(queryKey);
 
       console.log("DATA", data);
 
       if (isQueryPresent) {
-        queryClient.setQueryData(queryKey, (old: SECRET[]) => {
+        queryClient.setQueryData(queryKey, (old: V[]) => {
           const result = old.map((item) => {
             return item._id === data._id ? data : item;
           });

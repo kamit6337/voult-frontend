@@ -21,3 +21,12 @@ export type UPDATE_SECRET = {
   value: string;
   favourite: boolean;
 };
+
+export type UPDATE_SECRET_FAVOURITE = {
+  _id: string;
+  favourite: boolean;
+};
+
+export type DELETE_SECRET = {
+  _id: string;
+};

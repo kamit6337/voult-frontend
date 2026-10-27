@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import type { SECRET } from "@/types/secret";
+import type { SECRET, UPDATE_SECRET_FAVOURITE } from "@/types/secret";
 
 import { Star, EllipsisVerticalIcon, CopyIcon, CheckIcon } from "lucide-react";
 import CopyButton from "./CopyButton";
@@ -14,7 +14,10 @@ import { Link } from "react-router-dom";
 import SecretValue from "./SecretValue";
 import { AlertDialog, AlertDialogTrigger } from "../ui/alert-dialog";
 import CreateSecret from "@/pages/protected/secrets/CreateSecret";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import useUpdate from "@/hooks/mutation/useUpdate";
+import { toast } from "sonner";
+import DeleteSecret from "./DeleteSecret";
 
 type Props = {
   secretsArr: SECRET[];
@@ -25,11 +28,29 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
   const [selectedSecret, setSelectedSecret] = useState<null | SECRET>(null);
 
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleSelect = (secret: SECRET) => {
+  const handleEditSelect = (secret: SECRET) => {
     setSelectedSecret(secret);
     setEditOpen(true);
   };
+
+  const handleDeleteSelect = (secret: SECRET) => {
+    setSelectedSecret(secret);
+    setDeleteOpen(true);
+  };
+
+  const updateSecret = useUpdate<UPDATE_SECRET_FAVOURITE, SECRET>({
+    mutationKey: ["update", "secret", "favourite"],
+    queryKey: ["user", "secrets"],
+    urlPath: "/secrets/favourite",
+  });
+
+  useEffect(() => {
+    if (updateSecret.isSuccess) {
+      toast.success("Secret Favourite Updated Successfully");
+    }
+  }, [updateSecret.isSuccess]);
 
   return (
     <main className="space-y-2">
@@ -78,14 +99,23 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
                 align="end"
                 className="w-max whitespace-nowrap"
               >
-                <DropdownMenuItem onSelect={() => handleSelect(item)}>
+                <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
                   Edit
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateSecret.mutate({
+                      _id: item._id,
+                      favourite: !item.favourite,
+                    })
+                  }
+                >
                   {item.favourite ? "Remove to Favourite" : "Add to Favourite"}
                 </DropdownMenuItem>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
+                  Delete
+                </DropdownMenuItem>
                 <Separator />
                 <DropdownMenuItem className="text-xs flex flex-col items-start">
                   <p>CreatedAt</p>
@@ -115,6 +145,18 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
             favourite={selectedSecret.favourite}
             secretId={selectedSecret._id}
             onClose={() => setEditOpen(false)}
+          />
+        )}
+      </AlertDialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        {selectedSecret && deleteOpen && (
+          <DeleteSecret
+            key={selectedSecret._id}
+            name={selectedSecret.name}
+            value={selectedSecret.value}
+            secretId={selectedSecret._id}
+            onClose={() => setDeleteOpen(false)}
           />
         )}
       </AlertDialog>

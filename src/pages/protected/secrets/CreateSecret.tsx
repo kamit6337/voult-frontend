@@ -21,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import useCreate from "@/hooks/mutation/useCreate";
 import { toast } from "sonner";
 import useUpdate from "@/hooks/mutation/useUpdate";
-import type { CREATE_SECRET, UPDATE_SECRET } from "@/types/secret";
+import type { CREATE_SECRET, SECRET, UPDATE_SECRET } from "@/types/secret";
 
 type Props = {
   isUpdate?: boolean;
@@ -55,13 +55,13 @@ const CreateSecret = ({
     },
   });
 
-  const createSecret = useCreate<CREATE_SECRET>({
+  const createSecret = useCreate<CREATE_SECRET, SECRET>({
     queryKey: ["user", "secrets"],
     mutationKey: ["user", "secrets", "create"],
     urlPath: "/secrets",
   });
 
-  const updateSecret = useUpdate<UPDATE_SECRET>({
+  const updateSecret = useUpdate<UPDATE_SECRET, SECRET>({
     queryKey: ["user", "secrets"],
     mutationKey: ["user", "secrets", "update"],
     urlPath: "/secrets",
