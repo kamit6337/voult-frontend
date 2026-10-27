@@ -30,6 +30,8 @@ type Props = {
   value?: string;
   favourite?: boolean;
   onClose: () => void;
+  projectId?: string;
+  queryKey: string[];
 };
 
 const CreateSecret = ({
@@ -39,6 +41,8 @@ const CreateSecret = ({
   value,
   favourite,
   onClose,
+  projectId,
+  queryKey,
 }: Props) => {
   const {
     register,
@@ -56,13 +60,13 @@ const CreateSecret = ({
   });
 
   const createSecret = useCreate<CREATE_SECRET, SECRET>({
-    queryKey: ["user", "secrets"],
+    queryKey,
     mutationKey: ["user", "secrets", "create"],
     urlPath: "/secrets",
   });
 
   const updateSecret = useUpdate<UPDATE_SECRET, SECRET>({
-    queryKey: ["user", "secrets"],
+    queryKey,
     mutationKey: ["user", "secrets", "update"],
     urlPath: "/secrets",
   });
@@ -80,8 +84,13 @@ const CreateSecret = ({
       });
       return;
     }
+    const obj: CREATE_SECRET = { ...data };
 
-    createSecret.mutateAsync(data).then(() => {
+    if (projectId) obj.projectId = projectId;
+
+    console.log("ProjectId", projectId);
+
+    createSecret.mutateAsync(obj).then(() => {
       handleClose();
       toast.success("Secret Created Successfully");
     });

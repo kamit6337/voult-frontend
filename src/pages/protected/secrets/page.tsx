@@ -17,7 +17,10 @@ const SecretPage = () => {
             <AlertDialogTrigger asChild>
               <Button>Create Secret</Button>
             </AlertDialogTrigger>
-            <CreateSecret onClose={() => setIsOpen(false)} />
+            <CreateSecret
+              queryKey={["user", "secrets"]}
+              onClose={() => setIsOpen(false)}
+            />
           </AlertDialog>
         </div>
         <Separator />

@@ -1,5 +1,4 @@
 import { patchReq } from "@/config/api";
-import type { SECRET } from "@/types/secret";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type MutationVariables = Record<string, string | number | boolean>;
@@ -24,9 +23,13 @@ const useUpdate = <T extends MutationVariables, V extends { _id: string }>({
       const isQueryPresent = queryClient.getQueryState(queryKey);
 
       console.log("DATA", data);
+      console.log("isQueryPresent", isQueryPresent);
+      console.log("queryKey", queryKey);
 
       if (isQueryPresent) {
         queryClient.setQueryData(queryKey, (old: V[]) => {
+          console.log("old", old);
+
           const result = old.map((item) => {
             return item._id === data._id ? data : item;
           });

@@ -22,9 +22,10 @@ import DeleteSecret from "./DeleteSecret";
 type Props = {
   secretsArr: SECRET[];
   isHeader?: boolean;
+  queryKey: string[];
 };
 
-const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
+const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
   const [selectedSecret, setSelectedSecret] = useState<null | SECRET>(null);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -42,7 +43,7 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
 
   const updateSecret = useUpdate<UPDATE_SECRET_FAVOURITE, SECRET>({
     mutationKey: ["update", "secret", "favourite"],
-    queryKey: ["user", "secrets"],
+    queryKey,
     urlPath: "/secrets/favourite",
   });
 
@@ -145,6 +146,7 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
             favourite={selectedSecret.favourite}
             secretId={selectedSecret._id}
             onClose={() => setEditOpen(false)}
+            queryKey={queryKey}
           />
         )}
       </AlertDialog>
@@ -157,6 +159,7 @@ const SecretComponent = ({ secretsArr, isHeader = true }: Props) => {
             value={selectedSecret.value}
             secretId={selectedSecret._id}
             onClose={() => setDeleteOpen(false)}
+            queryKey={queryKey}
           />
         )}
       </AlertDialog>

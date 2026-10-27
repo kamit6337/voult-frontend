@@ -9,7 +9,13 @@ const Secrets = () => {
     return <p>No Data</p>;
   }
 
-  return <SecretsComponent secretsArr={data} isHeader={false} />;
+  return (
+    <SecretsComponent
+      secretsArr={data}
+      isHeader={false}
+      queryKey={["user", "secrets"]}
+    />
+  );
 };
 
 export default Secrets;

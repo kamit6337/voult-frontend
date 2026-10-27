@@ -13,6 +13,7 @@ export type CREATE_SECRET = {
   name: string;
   value: string;
   favourite: boolean;
+  projectId?: string;
 };
 
 export type UPDATE_SECRET = {

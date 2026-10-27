@@ -14,12 +14,13 @@ type Props = {
   name: string;
   value: string;
   onClose: () => void;
+  queryKey: string[];
 };
 
-const DeleteSecret = ({ secretId, name, value, onClose }: Props) => {
+const DeleteSecret = ({ queryKey, secretId, name, value, onClose }: Props) => {
   const deleteSecret = useDelete<DELETE_SECRET, SECRET>({
     mutationKey: ["delete", "secret"],
-    queryKey: ["user", "secrets"],
+    queryKey,
     urlPath: "/secrets",
   });
 
