@@ -1,5 +1,5 @@
 import SecretsComponent from "@/components/secrets/SecretComponent";
-import { getSecretsByUserIdQuery } from "@/query/secrets/getByUserId";
+import { getSecretsByUserIdQuery } from "@/query/secrets/secrets";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 const Secrets = () => {

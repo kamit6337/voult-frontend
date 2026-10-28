@@ -22,7 +22,7 @@ api.interceptors.response.use(
 
 export const getReq = async <T>(
   path: string,
-  params?: Record<string, string | number | boolean>,
+  params?: Record<string, string | number | boolean | null>,
 ) => {
   try {
     const res = await api.get<T>(path, {
@@ -40,7 +40,7 @@ export const getReq = async <T>(
 
 export const postReq = async <T>(
   path: string,
-  body: Record<string, string | number | boolean>,
+  body: Record<string, string | number | boolean | null>,
 ) => {
   try {
     const res = await api.post<T>(path, body);
@@ -56,7 +56,7 @@ export const postReq = async <T>(
 
 export const patchReq = async <T>(
   path: string,
-  body: Record<string, string | number | boolean>,
+  body: Record<string, string | number | boolean | null>,
 ) => {
   try {
     const res = await api.patch<T>(path, body);

@@ -4,10 +4,10 @@ import { getSecretsByProjectId } from "@/query/secrets/secrets";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import CreateSecret from "../secrets/CreateSecret";
 import { Separator } from "@/components/ui/separator";
 import QuerySuspenseBoundary from "@/provider/QuerySuspenseBoundary";
 import ProjectSecrets from "./ProjectSecrets";
+import CreateSecret from "@/components/secrets/CreateSecret";
 
 const SinglePage = () => {
   const projectId = useSearchParams()[0].get("id");
@@ -27,7 +27,6 @@ const SinglePage = () => {
             </AlertDialogTrigger>
             <CreateSecret
               onClose={() => setIsOpen(false)}
-              queryKey={["project", "secrets", projectId]}
               projectId={projectId}
             />
           </AlertDialog>

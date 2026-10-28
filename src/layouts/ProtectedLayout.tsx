@@ -7,13 +7,17 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import Loading from "@/lib/Loading";
+import { getProjectsByUserIdQuery } from "@/query/projects/projects";
 import { useLoginCheck } from "@/query/users/getUserMe";
+import { useQuery } from "@tanstack/react-query";
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function ProtectedLayout() {
-  const { data, isLoading, error } = useLoginCheck({ enabled: true });
+  const { isLoading, error, isSuccess } = useLoginCheck({ enabled: true });
 
-  if (isLoading) {
+  const projectQuery = useQuery(getProjectsByUserIdQuery(isSuccess));
+
+  if (isLoading || projectQuery.isLoading) {
     return <Loading hScreen={true} />;
   }
 
@@ -24,6 +28,19 @@ export default function ProtectedLayout() {
         replace
       />
     );
+  }
+
+  if (projectQuery.error) {
+    return (
+      <Navigate
+        to={`/signin?errMsg=${projectQuery.error?.message || "Unauthorized"}`}
+        replace
+      />
+    );
+  }
+
+  if (!isSuccess || !projectQuery.isSuccess) {
+    return <div>Something went wrong. Please try later</div>;
   }
 
   return (

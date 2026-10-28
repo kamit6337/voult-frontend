@@ -1,5 +1,5 @@
 import ProjectComponent from "@/components/projects/ProjectComponent";
-import { getProjectsByUserIdQuery } from "@/query/projects/getByUserId";
+import { getProjectsByUserIdQuery } from "@/query/projects/projects";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 const Projects = () => {

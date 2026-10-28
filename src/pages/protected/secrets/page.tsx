@@ -1,10 +1,10 @@
-import CreateSecret from "./CreateSecret";
 import { Separator } from "@/components/ui/separator";
 import Secrets from "./Secrets";
 import QuerySuspenseBoundary from "@/provider/QuerySuspenseBoundary";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import CreateSecret from "@/components/secrets/CreateSecret";
 
 const SecretPage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,10 +17,7 @@ const SecretPage = () => {
             <AlertDialogTrigger asChild>
               <Button>Create Secret</Button>
             </AlertDialogTrigger>
-            <CreateSecret
-              queryKey={["user", "secrets"]}
-              onClose={() => setIsOpen(false)}
-            />
+            <CreateSecret onClose={() => setIsOpen(false)} />
           </AlertDialog>
         </div>
         <Separator />

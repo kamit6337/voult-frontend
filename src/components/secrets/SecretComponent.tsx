@@ -2,22 +2,27 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import type { SECRET, UPDATE_SECRET_FAVOURITE } from "@/types/secret";
-
 import { Star, EllipsisVerticalIcon, CopyIcon, CheckIcon } from "lucide-react";
 import CopyButton from "./CopyButton";
 import { Link } from "react-router-dom";
 import SecretValue from "./SecretValue";
-import { AlertDialog, AlertDialogTrigger } from "../ui/alert-dialog";
-import CreateSecret from "@/pages/protected/secrets/CreateSecret";
-import { useEffect, useState } from "react";
-import useUpdate from "@/hooks/mutation/useUpdate";
+import { AlertDialog } from "../ui/alert-dialog";
+import { useState } from "react";
+import useUpdate from "@/hooks/mutation/secrets/useUpdateSecret";
 import { toast } from "sonner";
 import DeleteSecret from "./DeleteSecret";
+import CreateSecret from "./CreateSecret";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectsByUserIdQuery } from "@/query/projects/projects";
+import useUpdateSecretFavourite from "@/hooks/mutation/secrets/useUpdateSecretFavourite";
 
 type Props = {
   secretsArr: SECRET[];
@@ -27,6 +32,7 @@ type Props = {
 
 const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
   const [selectedSecret, setSelectedSecret] = useState<null | SECRET>(null);
+  const { data: userProjects } = useQuery(getProjectsByUserIdQuery());
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -41,17 +47,7 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
     setDeleteOpen(true);
   };
 
-  const updateSecret = useUpdate<UPDATE_SECRET_FAVOURITE, SECRET>({
-    mutationKey: ["update", "secret", "favourite"],
-    queryKey,
-    urlPath: "/secrets/favourite",
-  });
-
-  // useEffect(() => {
-  //   if (updateSecret.isSuccess) {
-  //     toast.success("Secret Favourite Updated Successfully");
-  //   }
-  // }, [updateSecret.isSuccess]);
+  const updateSecret = useUpdateSecretFavourite();
 
   return (
     <main className="space-y-2">
@@ -70,6 +66,8 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
       {secretsArr.map((item, i) => {
         const nameCopiedId = `${item._id}-${item.name}`;
         const valueCopiedId = `${item._id}-${item.value}`;
+
+        const project = userProjects?.find((i) => i._id === item.projectId);
 
         return (
           <div
@@ -100,24 +98,40 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
                 align="end"
                 className="w-max whitespace-nowrap"
               >
-                <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
-                  Edit
-                </DropdownMenuItem>
+                {project && (
+                  <>
+                    <DropdownMenuItem className="flex flex-col items-start">
+                      <p>Project :</p>
+                      <p className="self-center">{project.name}</p>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
 
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateSecret.mutate({
-                      _id: item._id,
-                      favourite: !item.favourite,
-                    })
-                  }
-                >
-                  {item.favourite ? "Remove to Favourite" : "Add to Favourite"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
-                  Delete
-                </DropdownMenuItem>
-                <Separator />
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Update Secret</DropdownMenuLabel>
+                  <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
+                    Edit
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() =>
+                      updateSecret.mutate({
+                        _id: item._id,
+                        favourite: !item.favourite,
+                      })
+                    }
+                  >
+                    {item.favourite
+                      ? "Remove to Favourite"
+                      : "Add to Favourite"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-xs flex flex-col items-start">
                   <p>CreatedAt</p>
                   <p className="self-center">
@@ -139,14 +153,9 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
       <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
         {selectedSecret && editOpen && (
           <CreateSecret
-            key={selectedSecret._id}
             isUpdate={true}
-            name={selectedSecret.name}
-            value={selectedSecret.value}
-            favourite={selectedSecret.favourite}
-            secretId={selectedSecret._id}
             onClose={() => setEditOpen(false)}
-            queryKey={queryKey}
+            secret={selectedSecret}
           />
         )}
       </AlertDialog>

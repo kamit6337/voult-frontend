@@ -12,3 +12,11 @@ export const getSingleProjectQuery = (
     staleTime: Infinity,
     enabled: toggle && !!projectId,
   });
+
+export const getProjectsByUserIdQuery = (toggle = true) =>
+  queryOptions({
+    queryKey: ["user", "projects"],
+    queryFn: () => getReq<PROJECT[]>("/projects"),
+    staleTime: Infinity,
+    enabled: toggle,
+  });

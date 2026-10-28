@@ -15,34 +15,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { formSchema, type FormValues } from "./zodSchema";
 import { Checkbox } from "@/components/ui/checkbox";
-import useCreate from "@/hooks/mutation/useCreate";
+import useCreate from "@/hooks/mutation/secrets/useCreateSecret";
 import { toast } from "sonner";
-import useUpdate from "@/hooks/mutation/useUpdate";
+import useUpdate from "@/hooks/mutation/secrets/useUpdateSecret";
 import type { CREATE_SECRET, SECRET, UPDATE_SECRET } from "@/types/secret";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectsByUserIdQuery } from "@/query/projects/projects";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useEffect, useState } from "react";
+import useCreateSecret from "@/hooks/mutation/secrets/useCreateSecret";
+import useUpdateSecret from "@/hooks/mutation/secrets/useUpdateSecret";
 
 type Props = {
   isUpdate?: boolean;
-  secretId?: string;
-  name?: string;
-  value?: string;
-  favourite?: boolean;
   onClose: () => void;
   projectId?: string;
-  queryKey: string[];
+  secret?: SECRET;
 };
 
 const CreateSecret = ({
   isUpdate = false,
-  secretId,
-  name,
-  value,
-  favourite,
+  secret,
   onClose,
   projectId,
-  queryKey,
 }: Props) => {
   const {
     register,
@@ -53,42 +58,51 @@ const CreateSecret = ({
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: name ?? "",
-      value: value ?? "",
-      favourite: favourite ?? false,
+      name: secret?.name ?? "",
+      value: secret?.value ?? "",
+      favourite: secret?.favourite ?? false,
     },
   });
 
-  const createSecret = useCreate<CREATE_SECRET, SECRET>({
-    queryKey,
-    mutationKey: ["user", "secrets", "create"],
-    urlPath: "/secrets",
-  });
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    projectId || "none",
+  );
 
-  const updateSecret = useUpdate<UPDATE_SECRET, SECRET>({
-    queryKey,
-    mutationKey: ["user", "secrets", "update"],
-    urlPath: "/secrets",
-  });
+  const { data: projects } = useQuery(getProjectsByUserIdQuery());
+
+  const createSecret = useCreateSecret();
+
+  const updateSecret = useUpdateSecret();
+
+  useEffect(() => {
+    if (isUpdate && secret) {
+      setSelectedProjectId(secret?.projectId || "none");
+    }
+  }, [isUpdate, secret]);
 
   const onSubmit = (data: FormValues) => {
-    if (isUpdate && secretId) {
-      const obj = {
+    if (isUpdate && secret?._id) {
+      const obj: UPDATE_SECRET = {
         ...data,
-        _id: secretId,
+        _id: secret._id,
+        projectId: selectedProjectId === "none" ? null : selectedProjectId,
       };
 
-      updateSecret.mutateAsync(obj).then(() => {
-        handleClose();
-        toast.success("Secret Updated Successfully");
-      });
+      updateSecret
+        .mutateAsync({
+          secret,
+          obj,
+        })
+        .then(() => {
+          handleClose();
+          toast.success("Secret Updated Successfully");
+        });
       return;
     }
-    const obj: CREATE_SECRET = { ...data };
-
-    if (projectId) obj.projectId = projectId;
-
-    console.log("ProjectId", projectId);
+    const obj: CREATE_SECRET = {
+      ...data,
+      projectId: selectedProjectId === "none" ? null : selectedProjectId,
+    };
 
     createSecret.mutateAsync(obj).then(() => {
       handleClose();
@@ -136,6 +150,30 @@ const CreateSecret = ({
                 <FieldError errors={[{ message: errors.value?.message }]} />
               )}
             </Field>
+
+            {projects && projects.length > 0 && (
+              <Field>
+                <FieldLabel>Project</FieldLabel>
+                <Select
+                  value={selectedProjectId}
+                  onValueChange={setSelectedProjectId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a Project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="none">Select a Project</SelectItem>
+                      {projects.map((item) => (
+                        <SelectItem key={item._id} value={item._id}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
 
             <Field orientation="horizontal">
               <Controller

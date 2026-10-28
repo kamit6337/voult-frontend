@@ -25,8 +25,8 @@ import { postReq } from "@/config/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { CREATE_PROJECT, PROJECT, UPDATE_PROJECT } from "@/types/project";
-import useCreate from "@/hooks/mutation/useCreate";
-import useUpdate from "@/hooks/mutation/useUpdate";
+import useCreate from "@/hooks/mutation/secrets/useCreateSecret";
+import useUpdate from "@/hooks/mutation/secrets/useUpdateSecret";
 
 type Props = {
   isUpdate?: boolean;
