@@ -33,8 +33,6 @@ const useDeleteSecret = ({
           ): GetSecretsByPaginationQueryCache => {
             console.log("old", old);
 
-            if (!old || old.pages.length === 0) return old;
-
             const updateSecret = old.pages.map((page) => {
               const secret = page.data.filter((s) => s._id !== variables._id);
 
@@ -64,8 +62,6 @@ const useDeleteSecret = ({
               old: GetSecretsByPaginationQueryCache,
             ): GetSecretsByPaginationQueryCache => {
               console.log("old", old);
-
-              if (!old || old.pages.length === 0) return old;
 
               const updateSecret = old.pages.map((page) => {
                 const secret = page.data.filter((s) => s._id !== variables._id);

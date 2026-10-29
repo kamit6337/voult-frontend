@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import type { CREATE_PROJECT, PROJECT, UPDATE_PROJECT } from "@/types/project";
 import useCreate from "@/hooks/mutation/secrets/useCreateSecret";
 import useUpdate from "@/hooks/mutation/secrets/useUpdateSecret";
+import useCreateProject from "@/hooks/mutation/projects/useCreateProject";
+import useUpdateProject from "@/hooks/mutation/projects/useUpdateProject";
 
 type Props = {
   isUpdate?: boolean;
@@ -57,17 +59,8 @@ const CreateProject = ({
     },
   });
 
-  const createProject = useCreate<CREATE_PROJECT, PROJECT>({
-    queryKey: ["user", "projects"],
-    mutationKey: ["user", "projects", "create"],
-    urlPath: "/projects",
-  });
-
-  const updateProject = useUpdate<UPDATE_PROJECT, PROJECT>({
-    queryKey: ["user", "projects"],
-    mutationKey: ["user", "projects", "update"],
-    urlPath: "/projects",
-  });
+  const createProject = useCreateProject();
+  const updateProject = useUpdateProject();
 
   const onSubmit = (data: FormValues) => {
     if (isUpdate && projectId) {
@@ -78,14 +71,12 @@ const CreateProject = ({
 
       updateProject.mutateAsync(obj).then(() => {
         handleClose();
-        toast.success("Secret Updated Successfully");
       });
       return;
     }
 
     createProject.mutateAsync(data).then(() => {
       handleClose();
-      toast.success("Secret Created Successfully");
     });
   };
 

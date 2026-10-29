@@ -7,7 +7,7 @@ import { toast } from "sonner";
 const useCreateSecret = () => {
   const queryClient = useQueryClient();
 
-  const query = useMutation({
+  const mutation = useMutation({
     mutationKey: ["secret", "create"],
     mutationFn: (obj: CREATE_SECRET) => postReq<SECRET>("/secrets", obj),
     onSuccess(data, variables, onMutateResult, context) {
@@ -23,8 +23,6 @@ const useCreateSecret = () => {
           (
             old: GetSecretsByPaginationQueryCache,
           ): GetSecretsByPaginationQueryCache => {
-            if (!old || old.pages.length === 0) return old;
-
             const [firstSecretArray, ...restSecretArray] = old.pages;
 
             const updateFirstSecretArray = {
@@ -53,8 +51,6 @@ const useCreateSecret = () => {
             (
               old: GetSecretsByPaginationQueryCache,
             ): GetSecretsByPaginationQueryCache => {
-              if (!old || old.pages.length === 0) return old;
-
               const [firstSecretArray, ...restSecretArray] = old.pages;
 
               const updateFirstSecretArray = {
@@ -79,7 +75,7 @@ const useCreateSecret = () => {
     },
   });
 
-  return query;
+  return mutation;
 };
 
 export default useCreateSecret;

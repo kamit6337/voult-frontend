@@ -1,4 +1,3 @@
-import useDelete from "@/hooks/mutation/secrets/useDeleteSecret";
 import {
   AlertDialogCancel,
   AlertDialogContent,
@@ -7,7 +6,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
-import type { DELETE_PROJECT, PROJECT } from "@/types/project";
+import useDeleteProject from "@/hooks/mutation/projects/useDeleteProject";
 
 type Props = {
   projectId: string;
@@ -16,11 +15,7 @@ type Props = {
 };
 
 const DeleteProject = ({ projectId, name, onClose }: Props) => {
-  const deleteProject = useDelete<DELETE_PROJECT, PROJECT>({
-    mutationKey: ["delete", "projects"],
-    queryKey: ["user", "projects"],
-    urlPath: "/projects",
-  });
+  const deleteProject = useDeleteProject();
 
   const handleSubmit = () => {
     deleteProject.mutateAsync({ _id: projectId }).then(() => {

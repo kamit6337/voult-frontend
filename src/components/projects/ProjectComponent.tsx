@@ -7,13 +7,16 @@ import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useState } from "react";
 import { AlertDialog } from "../ui/alert-dialog";
 import CreateProject from "./CreateProject";
 import DeleteProject from "./DeleteProject";
+import useUpdateProject from "@/hooks/mutation/projects/useUpdateProject";
 
 type Props = {
   projects: PROJECT[];
@@ -34,6 +37,17 @@ const ProjectComponent = ({ projects, isHeader = true }: Props) => {
   const handleDeleteSelect = (project: PROJECT) => {
     setSelectedProject(project);
     setDeleteOpen(true);
+  };
+
+  const updateProject = useUpdateProject();
+
+  const handleUpdateFavourite = (project: PROJECT) => {
+    const update: PROJECT = {
+      ...project,
+      favourite: !project.favourite,
+    };
+
+    updateProject.mutate(update);
   };
 
   return (
@@ -58,75 +72,65 @@ const ProjectComponent = ({ projects, isHeader = true }: Props) => {
       </div>
       <Separator />
 
-      {projects.map((item, i) => {
-        return (
-          <div key={item._id}>
-            <div className="flex justify-between items-center text-sm">
-              <p className="basis-6 grow-0 shrink-0 flex justify-center">
-                {i + 1}
-              </p>
-              <div className="basis-10 flex justify-center">
-                <Star size={16} fill={item.favourite ? "yellow" : "black"} />
-              </div>
-              <Link to={`/single?id=${item._id}`} className="flex-1">
-                <p className="line-clamp-1">{item.name}</p>
-              </Link>
-              <p className="basis-40 flex justify-center text-xs dark:text-gray-200">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </p>
-              <p className="basis-40 flex justify-center text-xs dark:text-gray-200">
-                {new Date(item.updatedAt).toLocaleDateString()}
-              </p>
-              <DropdownMenu>
-                <div className="basis-40 flex justify-end">
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={"outline"}>
-                      <EllipsisVerticalIcon />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </div>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-max whitespace-nowrap"
-                >
-                  <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
-                    Edit
-                  </DropdownMenuItem>
+      {projects.length === 0 && <div>No Project here</div>}
 
-                  <DropdownMenuItem
-                  // onClick={() =>
-                  //   updateSecret.mutate({
-                  //     _id: item._id,
-                  //     favourite: !item.favourite,
-                  //   })
-                  // }
+      {projects.length > 0 &&
+        projects.map((item, i) => {
+          return (
+            <div key={item._id}>
+              <div className="flex justify-between items-center text-sm">
+                <p className="basis-6 grow-0 shrink-0 flex justify-center">
+                  {i + 1}
+                </p>
+                <div className="basis-10 flex justify-center">
+                  <Star size={16} fill={item.favourite ? "yellow" : "black"} />
+                </div>
+                <Link to={`/single?id=${item._id}`} className="flex-1">
+                  <p className="line-clamp-1">{item.name}</p>
+                </Link>
+                <p className="basis-40 flex justify-center text-xs dark:text-gray-200">
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </p>
+                <p className="basis-40 flex justify-center text-xs dark:text-gray-200">
+                  {new Date(item.updatedAt).toLocaleDateString()}
+                </p>
+                <DropdownMenu>
+                  <div className="basis-40 flex justify-end">
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={"outline"}>
+                        <EllipsisVerticalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </div>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-max whitespace-nowrap"
                   >
-                    {item.favourite
-                      ? "Remove to Favourite"
-                      : "Add to Favourite"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
-                    Delete
-                  </DropdownMenuItem>
-                  <Separator />
-                  <DropdownMenuItem className="text-xs flex flex-col items-start">
-                    <p>CreatedAt</p>
-                    <p className="self-center">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </p>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-xs flex flex-col items-start">
-                    <p>UpdatedAt</p>
-                    <p className="self-center">
-                      {new Date(item.updatedAt).toLocaleDateString()}
-                    </p>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Update Project</DropdownMenuLabel>
+                      <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
+                        Edit
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => handleUpdateFavourite(item)}
+                      >
+                        {item.favourite
+                          ? "Remove from Favourite"
+                          : "Add to Favourite"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => handleDeleteSelect(item)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
       <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
         {selectedProject && editOpen && (

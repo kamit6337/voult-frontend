@@ -75,7 +75,6 @@ const useUpdateSecret = () => {
             ): GetSecretsByPaginationQueryCache => {
               console.log("old", old);
 
-              if (!old || old.pages.length === 0) return old;
 
               const updateSecret = old.pages.map((page) => {
                 const secret = page.data.filter((s) => s._id !== data._id);
@@ -111,7 +110,6 @@ const useUpdateSecret = () => {
             (
               old: GetSecretsByPaginationQueryCache,
             ): GetSecretsByPaginationQueryCache => {
-              if (!old || old.pages.length === 0) return old;
 
               const [firstSecretArray, ...restSecretArray] = old.pages;
 

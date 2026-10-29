@@ -18,7 +18,7 @@ export const getSecretsByUserIdQuery = () =>
 
 export const getFavouriteSecretsByUserIdQuery = () =>
   infiniteQueryOptions({
-    queryKey: ["user", "secrets", "none"],
+    queryKey: ["user", "secrets", "favourite"],
     initialPageParam: null as CURSOR | null,
     queryFn: ({ pageParam }) => {
       return getReq<CURSOR_RESPONSE<SECRET>>("/secrets/favourite", {

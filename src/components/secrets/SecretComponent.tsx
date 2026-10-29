@@ -9,15 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import type { SECRET, UPDATE_SECRET_FAVOURITE } from "@/types/secret";
+import type { SECRET } from "@/types/secret";
 import { Star, EllipsisVerticalIcon, CopyIcon, CheckIcon } from "lucide-react";
 import CopyButton from "./CopyButton";
 import { Link } from "react-router-dom";
 import SecretValue from "./SecretValue";
 import { AlertDialog } from "../ui/alert-dialog";
 import { useState } from "react";
-import useUpdate from "@/hooks/mutation/secrets/useUpdateSecret";
-import { toast } from "sonner";
 import DeleteSecret from "./DeleteSecret";
 import CreateSecret from "./CreateSecret";
 import { useQuery } from "@tanstack/react-query";
@@ -85,92 +83,95 @@ const SecretComponent = ({
         </>
       )}
 
-      {secretsArr.map((item, i) => {
-        const nameCopiedId = `${item._id}-${item.name}`;
-        const valueCopiedId = `${item._id}-${item.value}`;
+      {secretsArr.length === 0 && <div>No Secret yet.</div>}
 
-        const project = userProjects?.find((i) => i._id === item.projectId);
+      {secretsArr.length > 0 &&
+        secretsArr.map((item, i) => {
+          const nameCopiedId = `${item._id}-${item.name}`;
+          const valueCopiedId = `${item._id}-${item.value}`;
 
-        return (
-          <div
-            key={item._id}
-            className="flex gap-2 justify-between items-center text-sm"
-          >
-            <p className="basis-6 grow-0 shrink-0 flex justify-center">
-              {i + 1}
-            </p>
-            <div className="basis-10 grow-0 shrink-0 flex justify-center">
-              <Star size={16} fill={item.favourite ? "yellow" : "black"} />
-            </div>
-            <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
-              <p className="truncate flex">{item.name}</p>
-              <CopyButton value={item.name} />
-            </div>
-            <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
-              <SecretValue value={item.value} />
-              <CopyButton value={item.value} />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant={"outline"} className="">
-                  <EllipsisVerticalIcon />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-max whitespace-nowrap"
-              >
-                {project && (
-                  <>
-                    <DropdownMenuItem className="flex flex-col items-start">
-                      <p>Project :</p>
-                      <p className="self-center">{project.name}</p>
+          const project = userProjects?.find((i) => i._id === item.projectId);
+
+          return (
+            <div
+              key={item._id}
+              className="flex gap-2 justify-between items-center text-sm"
+            >
+              <p className="basis-6 grow-0 shrink-0 flex justify-center">
+                {i + 1}
+              </p>
+              <div className="basis-10 grow-0 shrink-0 flex justify-center">
+                <Star size={16} fill={item.favourite ? "yellow" : "black"} />
+              </div>
+              <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
+                <p className="truncate flex">{item.name}</p>
+                <CopyButton value={item.name} />
+              </div>
+              <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
+                <SecretValue value={item.value} />
+                <CopyButton value={item.value} />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant={"outline"} className="">
+                    <EllipsisVerticalIcon />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-max whitespace-nowrap"
+                >
+                  {project && (
+                    <>
+                      <DropdownMenuItem className="flex flex-col items-start">
+                        <p>Project :</p>
+                        <p className="self-center">{project.name}</p>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Update Secret</DropdownMenuLabel>
+                    <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
+                      Edit
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
 
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Update Secret</DropdownMenuLabel>
-                  <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
-                    Edit
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        updateSecret.mutate({
+                          _id: item._id,
+                          favourite: !item.favourite,
+                        })
+                      }
+                    >
+                      {item.favourite
+                        ? "Remove from Favourite"
+                        : "Add to Favourite"}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
 
-                  <DropdownMenuItem
-                    onClick={() =>
-                      updateSecret.mutate({
-                        _id: item._id,
-                        favourite: !item.favourite,
-                      })
-                    }
-                  >
-                    {item.favourite
-                      ? "Remove to Favourite"
-                      : "Add to Favourite"}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-xs flex flex-col items-start">
+                    <p>CreatedAt</p>
+                    <p className="self-center">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </p>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
-                    Delete
+                  <DropdownMenuItem className="text-xs flex flex-col items-start">
+                    <p>UpdatedAt</p>
+                    <p className="self-center">
+                      {new Date(item.updatedAt).toLocaleDateString()}
+                    </p>
                   </DropdownMenuItem>
-                </DropdownMenuGroup>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-xs flex flex-col items-start">
-                  <p>CreatedAt</p>
-                  <p className="self-center">
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </p>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs flex flex-col items-start">
-                  <p>UpdatedAt</p>
-                  <p className="self-center">
-                    {new Date(item.updatedAt).toLocaleDateString()}
-                  </p>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        })}
 
       {isFetchingNextPage && <Loading hScreen={false} />}
       {hasNextPage && !isFetchingNextPage && <div ref={inViewRef} />}
