@@ -1,5 +1,5 @@
 import { patchReq } from "@/config/api";
-import type { GetSecretsByUserIdQueryCache } from "@/query/secrets/secrets";
+import type { GetSecretsByPaginationQueryCache } from "@/types/global";
 import type {
   SECRET,
   UPDATE_SECRET,
@@ -26,7 +26,9 @@ const useUpdateSecret = () => {
       if (isQueryPresent) {
         queryClient.setQueryData(
           secretsQueryKey,
-          (old: GetSecretsByUserIdQueryCache): GetSecretsByUserIdQueryCache => {
+          (
+            old: GetSecretsByPaginationQueryCache,
+          ): GetSecretsByPaginationQueryCache => {
             console.log("old", old);
             if (!old || old.pages.length === 0) return old;
 
@@ -68,12 +70,26 @@ const useUpdateSecret = () => {
         if (isQueryPresent) {
           queryClient.setQueryData(
             secretRemovedProjectQueryKey,
-            (old: SECRET[]) => {
+            (
+              old: GetSecretsByPaginationQueryCache,
+            ): GetSecretsByPaginationQueryCache => {
               console.log("old", old);
 
-              const result = old.filter((item) => item._id !== data._id);
+              if (!old || old.pages.length === 0) return old;
 
-              return result;
+              const updateSecret = old.pages.map((page) => {
+                const secret = page.data.filter((s) => s._id !== data._id);
+
+                return {
+                  ...page,
+                  data: secret,
+                };
+              });
+
+              return {
+                ...old,
+                pages: updateSecret,
+              };
             },
           );
         }
@@ -92,14 +108,59 @@ const useUpdateSecret = () => {
         if (isSecretAddQueryPresent) {
           queryClient.setQueryData(
             secretAddProjectQueryKey,
-            (old: SECRET[]) => {
-              console.log("old", old);
+            (
+              old: GetSecretsByPaginationQueryCache,
+            ): GetSecretsByPaginationQueryCache => {
+              if (!old || old.pages.length === 0) return old;
 
-              const result = [data, ...old];
+              const [firstSecretArray, ...restSecretArray] = old.pages;
 
-              return result;
+              const updateFirstSecretArray = {
+                ...firstSecretArray,
+                data: [data, ...firstSecretArray.data],
+              };
+
+              return {
+                ...old,
+                pages: [updateFirstSecretArray, ...restSecretArray],
+              };
             },
           );
+        }
+      } else {
+        // IF PROJECT OF SECRET NOT CHANGED
+        if (data.projectId) {
+          const secretsQueryKey = ["user", "secrets", data.projectId];
+
+          const isQueryPresent = queryClient.getQueryState(secretsQueryKey);
+
+          if (isQueryPresent) {
+            queryClient.setQueryData(
+              secretsQueryKey,
+              (
+                old: GetSecretsByPaginationQueryCache,
+              ): GetSecretsByPaginationQueryCache => {
+                console.log("old", old);
+                if (!old || old.pages.length === 0) return old;
+
+                const updateSecret = old.pages.map((page) => {
+                  const secret = page.data.map((s) =>
+                    s._id === data._id ? data : s,
+                  );
+
+                  return {
+                    ...page,
+                    data: secret,
+                  };
+                });
+
+                return {
+                  ...old,
+                  pages: updateSecret,
+                };
+              },
+            );
+          }
         }
       }
 

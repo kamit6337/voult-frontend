@@ -29,14 +29,12 @@ import Loading from "@/lib/Loading";
 type Props = {
   secretsArr: SECRET[];
   isHeader?: boolean;
-  queryKey: string[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
 };
 
 const SecretComponent = ({
-  queryKey,
   secretsArr,
   isHeader = true,
   hasNextPage,

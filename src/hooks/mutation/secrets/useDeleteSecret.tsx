@@ -1,5 +1,5 @@
 import { deleteReq } from "@/config/api";
-import type { GetSecretsByUserIdQueryCache } from "@/query/secrets/secrets";
+import type { GetSecretsByPaginationQueryCache } from "@/types/global";
 import type { SECRET } from "@/types/secret";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,7 +28,9 @@ const useDeleteSecret = ({
       if (isQueryPresent) {
         queryClient.setQueryData(
           secretsQueryKey,
-          (old: GetSecretsByUserIdQueryCache): GetSecretsByUserIdQueryCache => {
+          (
+            old: GetSecretsByPaginationQueryCache,
+          ): GetSecretsByPaginationQueryCache => {
             console.log("old", old);
 
             if (!old || old.pages.length === 0) return old;
@@ -48,6 +50,39 @@ const useDeleteSecret = ({
             };
           },
         );
+      }
+
+      if (variables.projectId) {
+        const secretsQueryKey = ["user", "secrets", variables.projectId];
+
+        const isQueryPresent = queryClient.getQueryState(secretsQueryKey);
+
+        if (isQueryPresent) {
+          queryClient.setQueryData(
+            secretsQueryKey,
+            (
+              old: GetSecretsByPaginationQueryCache,
+            ): GetSecretsByPaginationQueryCache => {
+              console.log("old", old);
+
+              if (!old || old.pages.length === 0) return old;
+
+              const updateSecret = old.pages.map((page) => {
+                const secret = page.data.filter((s) => s._id !== variables._id);
+
+                return {
+                  ...page,
+                  data: secret,
+                };
+              });
+
+              return {
+                ...old,
+                pages: updateSecret,
+              };
+            },
+          );
+        }
       }
 
       toast.success(successMsg);

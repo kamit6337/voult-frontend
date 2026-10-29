@@ -1,3 +1,5 @@
+import type { SECRET } from "./secret";
+
 export type CURSOR_RESPONSE<T> = {
   data: T[];
   nextCursor: CURSOR | null;
@@ -7,4 +9,9 @@ export type CURSOR_RESPONSE<T> = {
 type CURSOR = {
   _id: string;
   createdAt: string;
+};
+
+export type GetSecretsByPaginationQueryCache = {
+  pages: CURSOR_RESPONSE<SECRET>[];
+  pageParams: (null | CURSOR)[];
 };

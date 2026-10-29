@@ -1,5 +1,5 @@
 import { postReq } from "@/config/api";
-import type { GetSecretsByUserIdQueryCache } from "@/query/secrets/secrets";
+import type { GetSecretsByPaginationQueryCache } from "@/types/global";
 import type { CREATE_SECRET, SECRET } from "@/types/secret";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,16 +15,14 @@ const useCreateSecret = () => {
 
       const secretsQueryKey = ["user", "secrets", "none"];
 
-      const projectSecretsQueryKey = data.projectId
-        ? ["user", "secrets", data.projectId]
-        : null;
-
       const isQueryPresent = queryClient.getQueryState(secretsQueryKey);
 
       if (isQueryPresent) {
         queryClient.setQueryData(
           secretsQueryKey,
-          (old: GetSecretsByUserIdQueryCache): GetSecretsByUserIdQueryCache => {
+          (
+            old: GetSecretsByPaginationQueryCache,
+          ): GetSecretsByPaginationQueryCache => {
             if (!old || old.pages.length === 0) return old;
 
             const [firstSecretArray, ...restSecretArray] = old.pages;
@@ -42,15 +40,34 @@ const useCreateSecret = () => {
         );
       }
 
-      if (projectSecretsQueryKey) {
+      if (data.projectId) {
+        const projectSecretsQueryKey = ["user", "secrets", data.projectId];
+
         const isQueryPresent = queryClient.getQueryState(
           projectSecretsQueryKey,
         );
 
         if (isQueryPresent) {
-          queryClient.setQueryData(projectSecretsQueryKey, (old: SECRET[]) => {
-            return [data, ...old];
-          });
+          queryClient.setQueryData(
+            projectSecretsQueryKey,
+            (
+              old: GetSecretsByPaginationQueryCache,
+            ): GetSecretsByPaginationQueryCache => {
+              if (!old || old.pages.length === 0) return old;
+
+              const [firstSecretArray, ...restSecretArray] = old.pages;
+
+              const updateFirstSecretArray = {
+                ...firstSecretArray,
+                data: [data, ...firstSecretArray.data],
+              };
+
+              return {
+                ...old,
+                pages: [updateFirstSecretArray, ...restSecretArray],
+              };
+            },
+          );
         }
       }
 

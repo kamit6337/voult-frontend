@@ -1,7 +1,5 @@
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { getSecretsByProjectId } from "@/query/secrets/secrets";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
