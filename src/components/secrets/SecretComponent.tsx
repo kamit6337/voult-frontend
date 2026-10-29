@@ -23,19 +23,43 @@ import CreateSecret from "./CreateSecret";
 import { useQuery } from "@tanstack/react-query";
 import { getProjectsByUserIdQuery } from "@/query/projects/projects";
 import useUpdateSecretFavourite from "@/hooks/mutation/secrets/useUpdateSecretFavourite";
+import { useOnInView } from "react-intersection-observer";
+import Loading from "@/lib/Loading";
 
 type Props = {
   secretsArr: SECRET[];
   isHeader?: boolean;
   queryKey: string[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
 };
 
-const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
+const SecretComponent = ({
+  queryKey,
+  secretsArr,
+  isHeader = true,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
+}: Props) => {
   const [selectedSecret, setSelectedSecret] = useState<null | SECRET>(null);
   const { data: userProjects } = useQuery(getProjectsByUserIdQuery());
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const inViewRef = useOnInView(
+    (inView, entry) => {
+      if (inView && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    {
+      threshold: 0.5,
+      triggerOnce: true,
+    },
+  );
 
   const handleEditSelect = (secret: SECRET) => {
     setSelectedSecret(secret);
@@ -150,6 +174,9 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
         );
       })}
 
+      {isFetchingNextPage && <Loading hScreen={false} />}
+      {hasNextPage && !isFetchingNextPage && <div ref={inViewRef} />}
+
       <AlertDialog open={editOpen} onOpenChange={setEditOpen}>
         {selectedSecret && editOpen && (
           <CreateSecret
@@ -163,12 +190,8 @@ const SecretComponent = ({ queryKey, secretsArr, isHeader = true }: Props) => {
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         {selectedSecret && deleteOpen && (
           <DeleteSecret
-            key={selectedSecret._id}
-            name={selectedSecret.name}
-            value={selectedSecret.value}
-            secretId={selectedSecret._id}
             onClose={() => setDeleteOpen(false)}
-            queryKey={queryKey}
+            secret={selectedSecret}
           />
         )}
       </AlertDialog>

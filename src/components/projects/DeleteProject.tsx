@@ -1,4 +1,4 @@
-import useDelete from "@/hooks/mutation/secrets/useDelete";
+import useDelete from "@/hooks/mutation/secrets/useDeleteSecret";
 import {
   AlertDialogCancel,
   AlertDialogContent,

@@ -1,19 +1,25 @@
 import SecretsComponent from "@/components/secrets/SecretComponent";
 import { getSecretsByUserIdQuery } from "@/query/secrets/secrets";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 
 const Secrets = () => {
-  const { data } = useSuspenseQuery(getSecretsByUserIdQuery());
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useSuspenseInfiniteQuery(getSecretsByUserIdQuery());
 
-  if (data.length === 0) {
+  const secrets = data?.pages.flatMap((page) => page.data) ?? [];
+
+  if (secrets.length === 0) {
     return <p>No Data</p>;
   }
 
   return (
     <SecretsComponent
-      secretsArr={data}
+      secretsArr={secrets}
       isHeader={false}
       queryKey={["user", "secrets"]}
+      hasNextPage={hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={isFetchingNextPage}
     />
   );
 };

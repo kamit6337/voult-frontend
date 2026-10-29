@@ -1,13 +1,25 @@
 import { getReq } from "@/config/api";
+import type { CURSOR, CURSOR_RESPONSE } from "@/types/global";
 import type { SECRET } from "@/types/secret";
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
 export const getSecretsByUserIdQuery = () =>
-  queryOptions({
+  infiniteQueryOptions({
     queryKey: ["user", "secrets", "none"],
-    queryFn: () => getReq<SECRET[]>("/secrets"),
+    initialPageParam: null as CURSOR | null,
+    queryFn: ({ pageParam }) => {
+      return getReq<CURSOR_RESPONSE<SECRET>>("/secrets", { cursor: pageParam });
+    },
+
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.nextCursor : undefined,
     staleTime: Infinity,
   });
+
+export type GetSecretsByUserIdQueryCache = {
+  pages: CURSOR_RESPONSE<SECRET>[];
+  pageParams: (null | CURSOR)[];
+};
 
 export const getSecretsByProjectId = (projectId: string | null) =>
   queryOptions({

@@ -1,4 +1,4 @@
-import useDelete from "@/hooks/mutation/secrets/useDelete";
+import useDelete from "@/hooks/mutation/secrets/useDeleteSecret";
 import {
   AlertDialogCancel,
   AlertDialogContent,
@@ -7,25 +7,19 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
-import type { DELETE_SECRET, SECRET } from "@/types/secret";
+import type { SECRET } from "@/types/secret";
+import useDeleteSecret from "@/hooks/mutation/secrets/useDeleteSecret";
 
 type Props = {
-  secretId: string;
-  name: string;
-  value: string;
   onClose: () => void;
-  queryKey: string[];
+  secret: SECRET;
 };
 
-const DeleteSecret = ({ queryKey, secretId, name, value, onClose }: Props) => {
-  const deleteSecret = useDelete<DELETE_SECRET, SECRET>({
-    mutationKey: ["delete", "secret"],
-    queryKey,
-    urlPath: "/secrets",
-  });
+const DeleteSecret = ({ secret, onClose }: Props) => {
+  const deleteSecret = useDeleteSecret();
 
   const handleSubmit = () => {
-    deleteSecret.mutateAsync({ _id: secretId }).then(() => {
+    deleteSecret.mutateAsync(secret).then(() => {
       onClose();
     });
   };
@@ -36,11 +30,11 @@ const DeleteSecret = ({ queryKey, secretId, name, value, onClose }: Props) => {
       <AlertDialogDescription>
         <div className="flex items-center gap-2 font-semibold">
           <p className="w-12 shrink-0">Name :</p>
-          <p>{name}</p>
+          <p>{secret.name}</p>
         </div>
         <div className="flex items-center gap-2 font-semibold">
           <p className="w-12 shrink-0">Value :</p>
-          <p>{value}</p>
+          <p>{secret.value}</p>
         </div>
         <p className="mt-5">Once deleted cannot be returned back. Be Careful</p>
       </AlertDialogDescription>

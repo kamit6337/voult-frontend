@@ -1,4 +1,5 @@
 import { patchReq } from "@/config/api";
+import type { GetSecretsByUserIdQueryCache } from "@/query/secrets/secrets";
 import type { SECRET, UPDATE_SECRET_FAVOURITE } from "@/types/secret";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -19,15 +20,30 @@ const useUpdateSecretFavourite = () => {
       const isQueryPresent = queryClient.getQueryState(secretsQueryKey);
 
       if (isQueryPresent) {
-        queryClient.setQueryData(secretsQueryKey, (old: SECRET[]) => {
-          console.log("old", old);
+        queryClient.setQueryData(
+          secretsQueryKey,
+          (old: GetSecretsByUserIdQueryCache): GetSecretsByUserIdQueryCache => {
+            console.log("old", old);
 
-          const result = old.map((item) => {
-            return item._id === data._id ? data : item;
-          });
+            if (!old || old.pages.length === 0) return old;
 
-          return result;
-        });
+            const updateSecret = old.pages.map((page) => {
+              const secret = page.data.map((s) =>
+                s._id === data._id ? data : s,
+              );
+
+              return {
+                ...page,
+                data: secret,
+              };
+            });
+
+            return {
+              ...old,
+              pages: updateSecret,
+            };
+          },
+        );
       }
 
       if (data.projectId) {

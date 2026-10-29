@@ -1,4 +1,5 @@
 import { patchReq } from "@/config/api";
+import type { GetSecretsByUserIdQueryCache } from "@/query/secrets/secrets";
 import type {
   SECRET,
   UPDATE_SECRET,
@@ -23,15 +24,29 @@ const useUpdateSecret = () => {
       const isQueryPresent = queryClient.getQueryState(secretsQueryKey);
 
       if (isQueryPresent) {
-        queryClient.setQueryData(secretsQueryKey, (old: SECRET[]) => {
-          console.log("old", old);
+        queryClient.setQueryData(
+          secretsQueryKey,
+          (old: GetSecretsByUserIdQueryCache): GetSecretsByUserIdQueryCache => {
+            console.log("old", old);
+            if (!old || old.pages.length === 0) return old;
 
-          const result = old.map((item) => {
-            return item._id === data._id ? data : item;
-          });
+            const updateSecret = old.pages.map((page) => {
+              const secret = page.data.map((s) =>
+                s._id === data._id ? data : s,
+              );
 
-          return result;
-        });
+              return {
+                ...page,
+                data: secret,
+              };
+            });
+
+            return {
+              ...old,
+              pages: updateSecret,
+            };
+          },
+        );
       }
 
       // CHECK IS PROJECT CHANGED ON SECRET
