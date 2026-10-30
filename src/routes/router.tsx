@@ -8,7 +8,7 @@ import FavouritePage from "@/pages/protected/favourite/page";
 import Home from "@/pages/protected/home/Home";
 import ProjectsPage from "@/pages/protected/projects/page";
 import SecretPage from "@/pages/protected/secrets/page";
-import SinglePage from "@/pages/protected/single_project/page";
+import SingleProject from "@/pages/protected/single_project/page";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "/single",
-            element: <SinglePage />,
+            element: <SingleProject />,
           },
         ],
       },

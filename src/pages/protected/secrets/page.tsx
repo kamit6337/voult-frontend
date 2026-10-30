@@ -5,27 +5,32 @@ import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import CreateSecret from "@/components/secrets/CreateSecret";
+import Metadata from "@/lib/Metadata";
 
 const SecretPage = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="space-y-4">
-      <div className="space-y-2 flex flex-col">
-        <div className="self-end">
-          <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-            <AlertDialogTrigger asChild>
-              <Button>Create Secret</Button>
-            </AlertDialogTrigger>
-            <CreateSecret onClose={() => setIsOpen(false)} />
-          </AlertDialog>
+    <>
+      <Metadata title="Voult | Secrets" description="Secrets page of Voult" />
+
+      <section className="space-y-4">
+        <div className="space-y-2 flex flex-col">
+          <div className="self-end">
+            <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+              <AlertDialogTrigger asChild>
+                <Button>Create Secret</Button>
+              </AlertDialogTrigger>
+              <CreateSecret onClose={() => setIsOpen(false)} />
+            </AlertDialog>
+          </div>
+          <Separator />
         </div>
-        <Separator />
-      </div>
-      <QuerySuspenseBoundary>
-        <Secrets />
-      </QuerySuspenseBoundary>
-    </section>
+        <QuerySuspenseBoundary>
+          <Secrets />
+        </QuerySuspenseBoundary>
+      </section>
+    </>
   );
 };
 
