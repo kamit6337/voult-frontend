@@ -23,6 +23,8 @@ import { getProjectsByUserIdQuery } from "@/query/projects/projects";
 import useUpdateSecretFavourite from "@/hooks/mutation/secrets/useUpdateSecretFavourite";
 import { useOnInView } from "react-intersection-observer";
 import Loading from "@/lib/Loading";
+import { useAppSelector } from "@/redux/store";
+import { secretInitialState } from "@/redux/slice/secretSlice";
 
 type Props = {
   secretsArr: SECRET[];
@@ -86,30 +88,27 @@ const SecretComponent = ({
       {secretsArr.length === 0 && <div>No Secret yet.</div>}
 
       {secretsArr.length > 0 &&
-        secretsArr.map((item, i) => {
-          const nameCopiedId = `${item._id}-${item.name}`;
-          const valueCopiedId = `${item._id}-${item.value}`;
-
-          const project = userProjects?.find((i) => i._id === item.projectId);
+        secretsArr.map((secret, i) => {
+          const project = userProjects?.find((p) => p._id === secret.projectId);
 
           return (
             <div
-              key={item._id}
+              key={secret._id}
               className="flex gap-2 justify-between items-center text-sm"
             >
               <p className="basis-6 grow-0 shrink-0 flex justify-center">
                 {i + 1}
               </p>
               <div className="basis-10 grow-0 shrink-0 flex justify-center">
-                <Star size={16} fill={item.favourite ? "yellow" : "black"} />
+                <Star size={16} fill={secret.favourite ? "yellow" : "black"} />
               </div>
               <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
-                <p className="truncate flex">{item.name}</p>
-                <CopyButton value={item.name} />
+                <p className="truncate flex">{secret.name}</p>
+                <CopyButton value={secret.name} />
               </div>
               <div className="flex-1 flex justify-between items-center gap-3 border rounded-lg p-2">
-                <SecretValue value={item.value} />
-                <CopyButton value={item.value} />
+                <SecretValue value={secret.value} />
+                <CopyButton value={secret.value} />
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -133,23 +132,25 @@ const SecretComponent = ({
 
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>Update Secret</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => handleEditSelect(item)}>
+                    <DropdownMenuItem onSelect={() => handleEditSelect(secret)}>
                       Edit
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
                       onClick={() =>
                         updateSecret.mutate({
-                          _id: item._id,
-                          favourite: !item.favourite,
+                          _id: secret._id,
+                          favourite: !secret.favourite,
                         })
                       }
                     >
-                      {item.favourite
+                      {secret.favourite
                         ? "Remove from Favourite"
                         : "Add to Favourite"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => handleDeleteSelect(item)}>
+                    <DropdownMenuItem
+                      onSelect={() => handleDeleteSelect(secret)}
+                    >
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -158,13 +159,13 @@ const SecretComponent = ({
                   <DropdownMenuItem className="text-xs flex flex-col items-start">
                     <p>CreatedAt</p>
                     <p className="self-center">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {new Date(secret.createdAt).toLocaleDateString()}
                     </p>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="text-xs flex flex-col items-start">
                     <p>UpdatedAt</p>
                     <p className="self-center">
-                      {new Date(item.updatedAt).toLocaleDateString()}
+                      {new Date(secret.updatedAt).toLocaleDateString()}
                     </p>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

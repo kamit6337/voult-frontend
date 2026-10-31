@@ -23,5 +23,11 @@ export type UPDATE_PROJECT_FAVOURITE = {
 };
 
 export type DELETE_PROJECT = {
-  _id: string;
+  id: string;
+  isDeleteSecretsAlso: boolean;
+};
+
+export type DELETE_PROJECT_RESPONSE = {
+  secretIds: string[];
+  isDeleteSecretsAlso: boolean;
 };

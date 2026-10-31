@@ -60,7 +60,7 @@ const useUpdateSecret = () => {
         const secretRemovedProjectQueryKey = [
           "user",
           "secrets",
-          variables.secret.projectId || "none",
+          variables.secret.projectId,
         ];
 
         const isQueryPresent = queryClient.getQueryState(
@@ -74,7 +74,6 @@ const useUpdateSecret = () => {
               old: GetSecretsByPaginationQueryCache,
             ): GetSecretsByPaginationQueryCache => {
               console.log("old", old);
-
 
               const updateSecret = old.pages.map((page) => {
                 const secret = page.data.filter((s) => s._id !== data._id);
@@ -94,11 +93,7 @@ const useUpdateSecret = () => {
         }
 
         // SECRET ADD PROJECTS
-        const secretAddProjectQueryKey = [
-          "user",
-          "secrets",
-          data.projectId || "none",
-        ];
+        const secretAddProjectQueryKey = ["user", "secrets", data.projectId];
 
         const isSecretAddQueryPresent = queryClient.getQueryState(
           secretAddProjectQueryKey,
@@ -110,7 +105,6 @@ const useUpdateSecret = () => {
             (
               old: GetSecretsByPaginationQueryCache,
             ): GetSecretsByPaginationQueryCache => {
-
               const [firstSecretArray, ...restSecretArray] = old.pages;
 
               const updateFirstSecretArray = {

@@ -1,12 +1,13 @@
 import {
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 import useDeleteProject from "@/hooks/mutation/projects/useDeleteProject";
+import { Checkbox } from "../ui/checkbox";
+import { useState } from "react";
 
 type Props = {
   projectId: string;
@@ -16,24 +17,34 @@ type Props = {
 
 const DeleteProject = ({ projectId, name, onClose }: Props) => {
   const deleteProject = useDeleteProject();
+  const [checked, setChecked] = useState(false);
 
   const handleSubmit = () => {
-    deleteProject.mutateAsync({ _id: projectId }).then(() => {
-      onClose();
-    });
+    deleteProject
+      .mutateAsync({ id: projectId, isDeleteSecretsAlso: checked })
+      .then(() => {
+        onClose();
+      });
   };
 
   return (
     <AlertDialogContent>
       <AlertDialogTitle>Delete Project</AlertDialogTitle>
-      <AlertDialogDescription>
+      <div className="text-sm text-muted-foreground md:text-pretty space-y-5">
         <div className="flex items-center gap-2 font-semibold">
           <p className="w-12 shrink-0">Name :</p>
           <p>{name}</p>
         </div>
 
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={checked}
+            onCheckedChange={(v: boolean) => setChecked(v)}
+          />
+          <p>Will Secrets be deleted also along with Project</p>
+        </div>
         <p className="mt-5">Once deleted cannot be returned back. Be Careful</p>
-      </AlertDialogDescription>
+      </div>
       <AlertDialogFooter className="mt-6">
         <AlertDialogCancel type="button" onClick={() => onClose()}>
           Cancel
