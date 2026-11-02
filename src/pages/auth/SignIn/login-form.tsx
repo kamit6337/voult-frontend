@@ -15,25 +15,60 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { BASE_URL } from "@/config/api";
+import { BASE_URL, postReq } from "@/config/api";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInForm, type SignInFormType } from "./zodSchema";
+import { toast } from "sonner";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { Link, replace, useNavigate } from "react-router-dom";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const {
+    handleSubmit,
+    register,
+    formState: { isSubmitting, errors },
+  } = useForm<SignInFormType>({
+    resolver: zodResolver(signInForm),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: SignInFormType) => {
+    try {
+      await postReq("/auth/sign-in", {
+        email: data.email,
+        password: data.password,
+      });
+
+      toast.success("Login Successfully");
+      navigate("/", { replace: true });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Issue in login";
+      toast.error(msg);
+    }
+  };
+
   const openGoogleOauth = () => {
     const serverUrl = `${BASE_URL}/auth/google`;
     window.location.href = serverUrl;
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6")}>
       <Card>
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardDescription>Sign In page of Voult</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
                 <Button
@@ -56,16 +91,56 @@ export function LoginForm({
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
+                  {...register("email", {
+                    required: true,
+                  })}
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
                 />
+                {errors.email?.message && (
+                  <p className="pl-2 text-xs text-red-500">
+                    {errors.email.message}
+                  </p>
+                )}
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <p className="ml-auto text-sm underline-offset-4 hover:underline">
+                    Forgot your password?
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Input
+                    {...register("password", {
+                      required: true,
+                    })}
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="xxxxxxx"
+                  />
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </Button>
+                </div>
+                {errors.password?.message && (
+                  <p className="pl-2 text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+              </Field>
+              <Field>
+                <Button disabled={isSubmitting} type="submit">
+                  Login
+                </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Sign up</a>
+                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

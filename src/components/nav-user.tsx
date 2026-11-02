@@ -23,6 +23,11 @@ import {
 } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { deleteReq } from "@/config/api";
+import type { LOGOUT_USER } from "@/types/auth";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function NavUser({
   user,
@@ -34,6 +39,25 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleLogout = async () => {
+    try {
+      const response = await deleteReq<LOGOUT_USER>("/auth/logout");
+      toast.success(response.message);
+      queryClient.clear();
+      navigate("/signin", { replace: true });
+      window.location.reload();
+    } catch (error) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Issue in logout. Please try later";
+
+      toast.error(msg);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -100,9 +124,9 @@ export function NavUser({
               <ModeToggle direct={true} />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
-              {/* <SignOutButton /> */}
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

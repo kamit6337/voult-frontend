@@ -16,7 +16,6 @@ const Secrets = () => {
     <SecretsComponent
       secretsArr={secrets}
       isHeader={false}
-      queryKey={["user", "secrets"]}
       hasNextPage={hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={isFetchingNextPage}

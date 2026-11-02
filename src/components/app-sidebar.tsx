@@ -27,7 +27,8 @@ import {
   Notebook,
 } from "lucide-react";
 import { company, projects } from "@/data/projects";
-import { useLoginCheck } from "@/query/users/getUserMe";
+import { getUserMeQuery } from "@/query/users/getUserMe";
+import { useQuery } from "@tanstack/react-query";
 
 // This is sample data.
 const data = {
@@ -160,7 +161,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data } = useLoginCheck();
+  const { data } = useQuery(getUserMeQuery());
 
   const userObject = {
     name: `${data?.firstName} ${data?.lastName}` || "User Name",

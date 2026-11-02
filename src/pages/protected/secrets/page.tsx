@@ -14,7 +14,7 @@ const SecretPage = () => {
     <>
       <Metadata title="Voult | Secrets" description="Secrets page of Voult" />
 
-      <section className="space-y-4">
+      <section className="space-y-2">
         <div className="space-y-2 flex flex-col">
           <div className="self-end">
             <AlertDialog open={isOpen} onOpenChange={setIsOpen}>

@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/sidebar";
 import Loading from "@/lib/Loading";
 import { getProjectsByUserIdQuery } from "@/query/projects/projects";
-import { useLoginCheck } from "@/query/users/getUserMe";
+import { getUserMeQuery } from "@/query/users/getUserMe";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 export default function ProtectedLayout() {
-  const { isLoading, error, isSuccess } = useLoginCheck({ enabled: true });
+  const { isLoading, isSuccess } = useQuery(getUserMeQuery(true));
 
   const projectQuery = useQuery(getProjectsByUserIdQuery(isSuccess));
 
@@ -21,26 +21,8 @@ export default function ProtectedLayout() {
     return <Loading hScreen={true} />;
   }
 
-  if (error) {
-    return (
-      <Navigate
-        to={`/signin?errMsg=${error?.message || "Unauthorized"}`}
-        replace
-      />
-    );
-  }
-
-  if (projectQuery.error) {
-    return (
-      <Navigate
-        to={`/signin?errMsg=${projectQuery.error?.message || "Unauthorized"}`}
-        replace
-      />
-    );
-  }
-
   if (!isSuccess || !projectQuery.isSuccess) {
-    return <div>Something went wrong. Please try later</div>;
+    return <div>Something went wrong. Please refresh the page.</div>;
   }
 
   return (
